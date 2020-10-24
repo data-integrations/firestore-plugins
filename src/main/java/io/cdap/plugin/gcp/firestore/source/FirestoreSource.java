@@ -37,7 +37,7 @@ import io.cdap.cdap.etl.api.batch.BatchRuntimeContext;
 import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
 import io.cdap.plugin.common.LineageRecorder;
-import io.cdap.plugin.gcp.common.GCPConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.util.FirestoreConstants;
 import io.cdap.plugin.gcp.firestore.util.FirestoreUtil;
 import org.slf4j.Logger;
@@ -179,8 +179,8 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
     } catch (Exception e) {
       collector.addFailure(e.getMessage(), "Ensure properties like project, service account " +
         "file path, collection are correct.")
-        .withConfigProperty(GCPConfig.NAME_SERVICE_ACCOUNT_FILE_PATH)
-        .withConfigProperty(GCPConfig.NAME_PROJECT)
+        .withConfigProperty(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH)
+        .withConfigProperty(FirestoreConfig.NAME_PROJECT)
         .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
         .withStacktrace(e.getStackTrace());
       collector.getOrThrowException();

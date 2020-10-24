@@ -25,7 +25,7 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
-import io.cdap.plugin.gcp.common.GCPReferenceSinkConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.sink.util.FirestoreSinkConstants;
 import io.cdap.plugin.gcp.firestore.sink.util.SinkIdType;
 import io.cdap.plugin.gcp.firestore.util.FirestoreConstants;
@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 /**
  * Defines a base {@link PluginConfig} that Firestore Source and Sink can re-use.
  */
-public class FirestoreSinkConfig extends GCPReferenceSinkConfig {
+public class FirestoreSinkConfig extends FirestoreConfig {
   @Name(FirestoreConstants.PROPERTY_DATABASE_ID)
   @Description("Firestore database name.")
   @Macro

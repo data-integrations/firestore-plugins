@@ -26,7 +26,7 @@ import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
-import io.cdap.plugin.gcp.common.GCPReferenceSourceConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.exception.FirestoreInitializationException;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfo;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfoParser;
@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 /**
  * Defines a base {@link PluginConfig} that Firestore Source.
  */
-public class FirestoreSourceConfig extends GCPReferenceSourceConfig {
+public class FirestoreSourceConfig extends FirestoreConfig {
   private static final Logger LOG = LoggerFactory.getLogger(FirestoreSourceConfig.class);
 
   @Name(FirestoreConstants.PROPERTY_DATABASE_ID)

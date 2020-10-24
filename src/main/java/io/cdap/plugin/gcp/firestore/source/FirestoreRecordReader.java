@@ -22,7 +22,7 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.common.base.Splitter;
-import io.cdap.plugin.gcp.common.GCPConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfo;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfoParser;
 import io.cdap.plugin.gcp.firestore.source.util.FirestoreQueryBuilder;
@@ -64,9 +64,9 @@ public class FirestoreRecordReader extends RecordReader<Object, QueryDocumentSna
     throws IOException, InterruptedException {
 
     conf = taskAttemptContext.getConfiguration();
-    String projectId = conf.get(GCPConfig.NAME_PROJECT);
+    String projectId = conf.get(FirestoreConfig.NAME_PROJECT);
     String databaseId = conf.get(FirestoreConstants.PROPERTY_DATABASE_ID);
-    String serviceAccountFilePath = conf.get(GCPConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
+    String serviceAccountFilePath = conf.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
     String collection = conf.get(FirestoreConstants.PROPERTY_COLLECTION);
     List<String> fields = Splitter.on(',').trimResults()
       .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_SCHEMA, ""));

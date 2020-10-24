@@ -23,7 +23,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteBatch;
 import com.google.cloud.firestore.WriteResult;
 import com.google.common.base.Strings;
-import io.cdap.plugin.gcp.common.GCPConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.sink.util.FirestoreSinkConstants;
 import io.cdap.plugin.gcp.firestore.util.FirestoreConstants;
 import io.cdap.plugin.gcp.firestore.util.FirestoreUtil;
@@ -58,8 +58,8 @@ public class FirestoreRecordWriter extends RecordWriter<NullWritable, Map<String
    */
   public FirestoreRecordWriter(TaskAttemptContext taskAttemptContext) {
     Configuration config = taskAttemptContext.getConfiguration();
-    String projectId = config.get(GCPConfig.NAME_PROJECT);
-    String serviceAccountFilePath = config.get(GCPConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
+    String projectId = config.get(FirestoreConfig.NAME_PROJECT);
+    String serviceAccountFilePath = config.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
     String databaseId = config.get(FirestoreConstants.PROPERTY_DATABASE_ID);
     String collection = Strings.nullToEmpty(config.get(FirestoreConstants.PROPERTY_COLLECTION)).trim();
     this.batchSize = config.getInt(FirestoreSinkConstants.PROPERTY_BATCH_SIZE, 25);

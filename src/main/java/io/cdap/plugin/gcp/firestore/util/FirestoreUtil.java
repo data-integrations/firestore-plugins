@@ -16,14 +16,16 @@
 
 package io.cdap.plugin.gcp.firestore.util;
 
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.common.base.Strings;
-import io.cdap.plugin.gcp.common.GCPUtils;
 import io.cdap.plugin.gcp.firestore.exception.FirestoreInitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import javax.annotation.Nullable;
 
@@ -50,7 +52,7 @@ public class FirestoreUtil {
       LOG.debug("serviceAccount={}, project={}, db={}...", serviceAccountFilePath, projectId, databaseId);
 
       if (!Strings.isNullOrEmpty(serviceAccountFilePath)) {
-        optionsBuilder.setCredentials(GCPUtils.loadServiceAccountCredentials(serviceAccountFilePath));
+        optionsBuilder.setCredentials(loadServiceAccountCredentials(serviceAccountFilePath));
       }
 
       if (!Strings.isNullOrEmpty(databaseId)) {
@@ -60,6 +62,13 @@ public class FirestoreUtil {
       return optionsBuilder.build().getService();
     } catch (IOException e) {
       throw new FirestoreInitializationException("Unable to connect to Firestore", e);
+    }
+  }
+
+  public static ServiceAccountCredentials loadServiceAccountCredentials(String path) throws IOException {
+    File credentialsPath = new File(path);
+    try (FileInputStream serviceAccountStream = new FileInputStream(credentialsPath)) {
+      return ServiceAccountCredentials.fromStream(serviceAccountStream);
     }
   }
 }

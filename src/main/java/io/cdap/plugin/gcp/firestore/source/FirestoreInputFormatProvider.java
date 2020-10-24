@@ -20,7 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.data.batch.InputFormatProvider;
-import io.cdap.plugin.gcp.common.GCPConfig;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.source.util.FirestoreSourceConstants;
 import io.cdap.plugin.gcp.firestore.util.FirestoreConstants;
 
@@ -52,7 +52,7 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
                                       String collection, String mode, String pullDocuments, String skipDocuments,
                                       String filters, List<String> fields) {
     ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>()
-      .put(GCPConfig.NAME_PROJECT, project)
+      .put(FirestoreConfig.NAME_PROJECT, project)
       .put(FirestoreConstants.PROPERTY_DATABASE_ID, Strings.isNullOrEmpty(databaseId) ? "" : databaseId)
       .put(FirestoreConstants.PROPERTY_COLLECTION, Strings.isNullOrEmpty(collection) ? "" : collection)
       .put(FirestoreSourceConstants.PROPERTY_QUERY_MODE, mode)
@@ -61,7 +61,7 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
       .put(FirestoreSourceConstants.PROPERTY_CUSTOM_QUERY, Strings.isNullOrEmpty(filters) ? "" : filters)
       .put(FirestoreSourceConstants.PROPERTY_SCHEMA, Joiner.on(",").join(fields));
     if (Objects.nonNull(serviceAccountPath)) {
-      builder.put(GCPConfig.NAME_SERVICE_ACCOUNT_FILE_PATH, serviceAccountPath);
+      builder.put(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH, serviceAccountPath);
     }
     this.configMap = builder.build();
   }
