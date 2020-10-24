@@ -383,7 +383,7 @@ public class FirestoreSourceConfig extends FirestoreConfig {
     List<String> skipDocumentList = Splitter.on(',').trimResults().splitToList(getSkipDocuments());
 
     if (mode == SourceQueryMode.BASIC) {
-      if (!pullDocumentList.isEmpty() && !skipDocumentList.isEmpty()) {
+      if (pullDocumentList.isEmpty() && skipDocumentList.isEmpty()) {
         collector.addFailure("Either Documents to pull Or Documents to skip should be defined", null)
           .withConfigProperty(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS)
           .withConfigProperty(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS);
