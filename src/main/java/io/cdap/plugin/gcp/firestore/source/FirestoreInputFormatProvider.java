@@ -40,7 +40,6 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
    * Constructor for FirestoreInputFormatProvider object.
    * @param project the project of Firestore DB
    * @param serviceAccountPath the service account path of Firestore DB
-   * @param databaseId the databaseId of Firestore DB
    * @param collection the collection
    * @param mode there are two modes (basic and advanced)
    * @param pullDocuments the list of documents to pull
@@ -48,12 +47,11 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
    * @param filters the filter for given field as well as value
    * @param fields the fields of collection
    */
-  public FirestoreInputFormatProvider(String project, @Nullable String serviceAccountPath, String databaseId,
-                                      String collection, String mode, String pullDocuments, String skipDocuments,
-                                      String filters, List<String> fields) {
+  public FirestoreInputFormatProvider(
+      String project, @Nullable String serviceAccountPath, String collection, String mode,
+      String pullDocuments, String skipDocuments, String filters, List<String> fields) {
     ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>()
       .put(FirestoreConfig.NAME_PROJECT, project)
-      .put(FirestoreConstants.PROPERTY_DATABASE_ID, Strings.isNullOrEmpty(databaseId) ? "" : databaseId)
       .put(FirestoreConstants.PROPERTY_COLLECTION, Strings.isNullOrEmpty(collection) ? "" : collection)
       .put(FirestoreSourceConstants.PROPERTY_QUERY_MODE, mode)
       .put(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS, Strings.isNullOrEmpty(pullDocuments) ? "" : pullDocuments)

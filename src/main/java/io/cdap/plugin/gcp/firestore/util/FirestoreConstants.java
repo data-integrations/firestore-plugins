@@ -27,11 +27,6 @@ public interface FirestoreConstants {
   String PLUGIN_NAME = "Firestore";
 
   /**
-   * Configuration property name used to specify Firestore database name.
-   */
-  String PROPERTY_DATABASE_ID = "databaseId";
-
-  /**
    * Configuration property name used to specify name of the database collection.
    */
   String PROPERTY_COLLECTION = "collection";

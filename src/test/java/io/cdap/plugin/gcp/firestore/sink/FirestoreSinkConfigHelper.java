@@ -82,7 +82,7 @@ public class FirestoreSinkConfigHelper {
     }
 
     public FirestoreSinkConfig build() {
-      return new FirestoreSinkConfig(referenceName, project, serviceFilePath, database, collection, idType, idAlias,
+      return new FirestoreSinkConfig(referenceName, project, serviceFilePath, collection, idType, idAlias,
         batchSize);
     }
   }

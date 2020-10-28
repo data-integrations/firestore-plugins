@@ -60,11 +60,6 @@
           "widget-attributes" : {
             "default": "auto-detect"
           }
-        },
-        {
-          "widget-type": "textbox",
-          "label": "Database Id",
-          "name": "databaseId"
         }
       ]
     },

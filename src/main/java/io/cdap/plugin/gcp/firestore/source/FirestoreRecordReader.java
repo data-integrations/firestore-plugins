@@ -65,18 +65,17 @@ public class FirestoreRecordReader extends RecordReader<Object, QueryDocumentSna
 
     conf = taskAttemptContext.getConfiguration();
     String projectId = conf.get(FirestoreConfig.NAME_PROJECT);
-    String databaseId = conf.get(FirestoreConstants.PROPERTY_DATABASE_ID);
     String serviceAccountFilePath = conf.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
     String collection = conf.get(FirestoreConstants.PROPERTY_COLLECTION);
     List<String> fields = Splitter.on(',').trimResults()
       .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_SCHEMA, ""));
-    List<String> pullDocuments = Splitter.on(',').trimResults()
+    List<String> pullDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
       .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS, ""));
-    List<String> skipDocuments = Splitter.on(',').trimResults()
+    List<String> skipDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
       .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS, ""));
     String customQuery = conf.get(FirestoreSourceConstants.PROPERTY_CUSTOM_QUERY, "");
 
-    db = FirestoreUtil.getFirestore(serviceAccountFilePath, projectId, databaseId);
+    db = FirestoreUtil.getFirestore(serviceAccountFilePath, projectId);
 
     try {
       List<FilterInfo> filters = getParsedFilters(customQuery);

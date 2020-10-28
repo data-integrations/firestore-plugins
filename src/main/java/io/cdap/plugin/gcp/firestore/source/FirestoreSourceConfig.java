@@ -49,12 +49,6 @@ import javax.annotation.Nullable;
 public class FirestoreSourceConfig extends FirestoreConfig {
   private static final Logger LOG = LoggerFactory.getLogger(FirestoreSourceConfig.class);
 
-  @Name(FirestoreConstants.PROPERTY_DATABASE_ID)
-  @Description("Firestore database name.")
-  @Macro
-  @Nullable
-  private String database;
-
   @Name(FirestoreConstants.PROPERTY_COLLECTION)
   @Description("Name of the database collection.")
   @Macro
@@ -105,6 +99,7 @@ public class FirestoreSourceConfig extends FirestoreConfig {
 
   @Name(FirestoreSourceConstants.PROPERTY_SCHEMA)
   @Description("Schema of records output by the source.")
+  @Nullable
   private String schema;
 
   /**
@@ -112,7 +107,6 @@ public class FirestoreSourceConfig extends FirestoreConfig {
    * @param referenceName the reference name
    * @param project the project id
    * @param serviceFilePath the service file path
-   * @param database the database id
    * @param collection the collection id
    * @param queryMode the query mode (basic or advanced)
    * @param pullDocuments the list of documents to pull
@@ -122,13 +116,13 @@ public class FirestoreSourceConfig extends FirestoreConfig {
    * @param idAlias the id alias
    * @param schema the schema
    */
-  public FirestoreSourceConfig(String referenceName, String project, String serviceFilePath, String database,
-                               String collection, String queryMode, String pullDocuments, String skipDocuments,
-                               String filters, String includeDocumentId, String idAlias, String schema) {
+  public FirestoreSourceConfig(
+      String referenceName, String project, String serviceFilePath, String collection,
+      String queryMode, String pullDocuments, String skipDocuments, String filters,
+      String includeDocumentId, String idAlias, String schema) {
     this.referenceName = referenceName;
     this.project = project;
     this.serviceFilePath = serviceFilePath;
-    this.database = database;
     this.collection = collection;
     this.queryMode = queryMode;
     this.pullDocuments = pullDocuments;
@@ -141,11 +135,6 @@ public class FirestoreSourceConfig extends FirestoreConfig {
 
   public String getReferenceName() {
     return referenceName;
-  }
-
-  @Nullable
-  public String getDatabase() {
-    return database;
   }
 
   public String getCollection() {
@@ -254,7 +243,7 @@ public class FirestoreSourceConfig extends FirestoreConfig {
     }
     Firestore db = null;
     try {
-      db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject(), getDatabase());
+      db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject());
 
       if (db != null) {
         db.close();
@@ -270,8 +259,12 @@ public class FirestoreSourceConfig extends FirestoreConfig {
         .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
         .withStacktrace(e.getStackTrace());
     } catch (Exception e) {
+      collector.addFailure(e.getMessage(), "Error while connecting to Firestore.")
+          .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
+          .withStacktrace(e.getStackTrace());
       LOG.error("Error", e);
     }
+    collector.getOrThrowException();
   }
 
   /**
@@ -372,7 +365,9 @@ public class FirestoreSourceConfig extends FirestoreConfig {
   }
   
   private void validateDocumentLists(FailureCollector collector) {
-    if (containsMacro(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS) ||
+    if (Strings.isNullOrEmpty(getPullDocuments()) ||
+      Strings.isNullOrEmpty(getSkipDocuments()) ||
+      containsMacro(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS) ||
       containsMacro(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS)) {
       return;
     }

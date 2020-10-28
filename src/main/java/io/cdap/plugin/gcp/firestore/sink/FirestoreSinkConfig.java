@@ -39,12 +39,6 @@ import javax.annotation.Nullable;
  * Defines a base {@link PluginConfig} that Firestore Source and Sink can re-use.
  */
 public class FirestoreSinkConfig extends FirestoreConfig {
-  @Name(FirestoreConstants.PROPERTY_DATABASE_ID)
-  @Description("Firestore database name.")
-  @Macro
-  @Nullable
-  private String database;
-
   @Name(FirestoreConstants.PROPERTY_COLLECTION)
   @Description("Name of the database collection. If the collection name does not exist in Firestore " +
     "then it will create a new collection and then the data will be written to it.")
@@ -81,19 +75,17 @@ public class FirestoreSinkConfig extends FirestoreConfig {
    * @param referenceName the reference name
    * @param project the project id
    * @param serviceFilePath the service file path
-   * @param database the database id
    * @param collection the collection
    * @param idType the id type
    * @param idAlias the id alias
    * @param batchSize the batch size
    */
   @VisibleForTesting
-  public FirestoreSinkConfig(String referenceName, String project, String serviceFilePath, String database,
+  public FirestoreSinkConfig(String referenceName, String project, String serviceFilePath,
                              String collection, String idType, String idAlias, int batchSize) {
     this.referenceName = referenceName;
     this.project = project;
     this.serviceFilePath = serviceFilePath;
-    this.database = database;
     this.collection = collection;
     this.idType = idType;
     this.idAlias = idAlias;
@@ -102,11 +94,6 @@ public class FirestoreSinkConfig extends FirestoreConfig {
 
   public String getReferenceName() {
     return referenceName;
-  }
-
-  @Nullable
-  public String getDatabase() {
-    return database;
   }
 
   public String getCollection() {
@@ -177,7 +164,7 @@ public class FirestoreSinkConfig extends FirestoreConfig {
       return;
     }
     try {
-      Firestore db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject(), getDatabase());
+      Firestore db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject());
       db.close();
     } catch (Exception e) {
       collector.addFailure(e.getMessage(), "Ensure properties like project, service account " +

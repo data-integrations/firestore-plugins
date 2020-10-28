@@ -40,23 +40,17 @@ public class FirestoreUtil {
    *
    * @param serviceAccountFilePath path to credentials defined in JSON file
    * @param projectId Google Cloud project ID
-   * @param databaseId Firestore Database ID
    * @return Firestore service
    */
-  public static Firestore getFirestore(@Nullable String serviceAccountFilePath, String projectId,
-                                       @Nullable String databaseId) {
+  public static Firestore getFirestore(@Nullable String serviceAccountFilePath, String projectId) {
     try {
       FirestoreOptions.Builder optionsBuilder = FirestoreOptions.newBuilder()
         .setProjectId(projectId);
 
-      LOG.debug("serviceAccount={}, project={}, db={}...", serviceAccountFilePath, projectId, databaseId);
+      LOG.debug("serviceAccount={}, project={}...", serviceAccountFilePath, projectId);
 
       if (!Strings.isNullOrEmpty(serviceAccountFilePath)) {
         optionsBuilder.setCredentials(loadServiceAccountCredentials(serviceAccountFilePath));
-      }
-
-      if (!Strings.isNullOrEmpty(databaseId)) {
-        optionsBuilder.setDatabaseId(databaseId);
       }
 
       return optionsBuilder.build().getService();

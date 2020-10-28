@@ -81,7 +81,7 @@ public class FirestoreSourceConfigHelper {
     }
 
     public FirestoreSourceConfig build() {
-      return new FirestoreSourceConfig(referenceName, project, serviceFilePath, database, collection,
+      return new FirestoreSourceConfig(referenceName, project, serviceFilePath, collection,
         "Basic", "", "", "", includeDocumentId, idAlias, schema);
     }
   }

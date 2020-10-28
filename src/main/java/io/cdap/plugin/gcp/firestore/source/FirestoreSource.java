@@ -100,7 +100,7 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
       return;
     }
 
-    pipelineConfigurer.getStageConfigurer().setOutputSchema(configuredSchema);
+    stageConfigurer.setOutputSchema(configuredSchema);
   }
 
   @Override
@@ -111,7 +111,6 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
 
     String project = config.getProject();
     String serviceAccountFile = config.getServiceAccountFilePath();
-    String database = config.getDatabase();
     String collection = config.getCollection();
     String mode = config.getQueryMode().getValue();
     String pullDocuments = config.getPullDocuments();
@@ -121,7 +120,7 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
     List<String> fields = fetchSchemaFields(config.getSchema(collector));
 
     context.setInput(Input.of(config.getReferenceName(), new FirestoreInputFormatProvider(project, serviceAccountFile,
-      database, collection, mode, pullDocuments, skipDocuments, filters, fields)));
+      collection, mode, pullDocuments, skipDocuments, filters, fields)));
 
     emitLineage(context);
   }
@@ -169,8 +168,7 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
 
     List<QueryDocumentSnapshot> items = null;
     try {
-      Firestore db = FirestoreUtil.getFirestore(config.getServiceAccountFilePath(), config.getProject(),
-        config.getDatabase());
+      Firestore db = FirestoreUtil.getFirestore(config.getServiceAccountFilePath(), config.getProject());
       ApiFuture<QuerySnapshot> query = db.collection(config.getCollection()).limit(1).get();
       QuerySnapshot querySnapshot = query.get();
 
