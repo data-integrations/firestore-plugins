@@ -259,7 +259,8 @@ public class FirestoreSourceConfig extends FirestoreConfig {
         .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
         .withStacktrace(e.getStackTrace());
     } catch (Exception e) {
-      collector.addFailure(e.getMessage(), "Error while connecting to Firestore.")
+      collector.addFailure("Error while connecting to Firestoe - " + e.getMessage(),
+          "Ensure Firestore connection params are correct.")
           .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
           .withStacktrace(e.getStackTrace());
       LOG.error("Error", e);
