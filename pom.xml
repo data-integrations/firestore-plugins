@@ -20,7 +20,7 @@
 
   <groupId>io.cdap.plugin</groupId>
   <artifactId>firestore-plugins</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <name>Google Cloud Firestore Plugins</name>
   <packaging>jar</packaging>
   <description>Plugins for Google Cloud Firestore</description>
