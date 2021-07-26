@@ -72,7 +72,7 @@
     <avro.version>1.8.2</avro.version>
     <commons.codec.version>1.4</commons.codec.version>
     <cdap.version>6.1.1</cdap.version>
-    <cdap.plugin.version>2.5.0-SNAPSHOT</cdap.plugin.version>
+    <cdap.plugin.version>2.5.0</cdap.plugin.version>
     <dropwizard.metrics-core.version>3.2.6</dropwizard.metrics-core.version>
     <flogger.system.backend.version>0.3.1</flogger.system.backend.version>
     <google.cloud.firestore.version>1.32.2</google.cloud.firestore.version>
