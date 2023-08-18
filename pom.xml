@@ -78,7 +78,7 @@
     <google.cloud.firestore.version>1.32.2</google.cloud.firestore.version>
     <google.protobuf.java.version>3.11.3</google.protobuf.java.version>
     <google.tink.version>1.3.0-rc3</google.tink.version>
-    <guava.version>27.0.1-jre</guava.version>
+    <guava.version>32.0.0-jre</guava.version>
     <hadoop.version>2.10.2</hadoop.version>
     <hbase-mapreduce-version>2.2.0</hbase-mapreduce-version>
     <hbase-shaded-client.version>1.4.10</hbase-shaded-client.version>
