@@ -75,17 +75,19 @@ public class FirestoreSinkConfig extends FirestoreConfig {
    * @param referenceName the reference name
    * @param project the project id
    * @param serviceFilePath the service file path
+   * @param databaseName the name of the database
    * @param collection the collection
    * @param idType the id type
    * @param idAlias the id alias
    * @param batchSize the batch size
    */
   @VisibleForTesting
-  public FirestoreSinkConfig(String referenceName, String project, String serviceFilePath,
+  public FirestoreSinkConfig(String referenceName, String project, String serviceFilePath, String databaseName,
                              String collection, String idType, String idAlias, int batchSize) {
     this.referenceName = referenceName;
     this.project = project;
     this.serviceFilePath = serviceFilePath;
+    this.databaseName = databaseName;
     this.collection = collection;
     this.idType = idType;
     this.idAlias = idAlias;
@@ -148,7 +150,6 @@ public class FirestoreSinkConfig extends FirestoreConfig {
    */
   public void validate(@Nullable Schema schema, FailureCollector collector) {
     super.validate(collector);
-
     validateBatchSize(collector);
     validateFirestoreConnection(collector);
 
@@ -164,13 +165,15 @@ public class FirestoreSinkConfig extends FirestoreConfig {
       return;
     }
     try {
-      Firestore db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject());
+      Firestore db = FirestoreUtil.getFirestore(getServiceAccount(), isServiceAccountFilePath(),
+       getProject(), getDatabaseName());
       db.close();
     } catch (Exception e) {
       collector.addFailure(e.getMessage(), "Ensure properties like project, service account " +
-        "file path are correct.")
+        "file path, database name are correct.")
         .withConfigProperty(NAME_SERVICE_ACCOUNT_FILE_PATH)
         .withConfigProperty(NAME_PROJECT)
+        .withConfigProperty(NAME_DATABASE)
         .withStacktrace(e.getStackTrace());
     }
   }
@@ -185,7 +188,7 @@ public class FirestoreSinkConfig extends FirestoreConfig {
   }
 
   /**
-   * Validates given field schema to be complaint with Firestore types.
+   * Validates given field schema to be compliant with Firestore types.
    * Will throw {@link IllegalArgumentException} if schema contains unsupported type.
    *
    * @param fieldName field name

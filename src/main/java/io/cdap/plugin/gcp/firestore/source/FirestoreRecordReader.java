@@ -22,7 +22,9 @@ import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
+import io.cdap.plugin.gcp.firestore.exception.FirestoreInitializationException;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfo;
 import io.cdap.plugin.gcp.firestore.source.util.FilterInfoParser;
 import io.cdap.plugin.gcp.firestore.source.util.FirestoreQueryBuilder;
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
  */
 public class FirestoreRecordReader extends RecordReader<Object, QueryDocumentSnapshot> {
   private static final Logger LOG = LoggerFactory.getLogger(FirestoreRecordReader.class);
-  private Configuration conf;
+  private Configuration config;
   private Firestore db;
   private List<QueryDocumentSnapshot> items;
   // Map key that represents the item index.
@@ -63,19 +65,42 @@ public class FirestoreRecordReader extends RecordReader<Object, QueryDocumentSna
   public void initialize(InputSplit inputSplit, TaskAttemptContext taskAttemptContext)
     throws IOException, InterruptedException {
 
-    conf = taskAttemptContext.getConfiguration();
-    String projectId = conf.get(FirestoreConfig.NAME_PROJECT);
-    String serviceAccountFilePath = conf.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
-    String collection = conf.get(FirestoreConstants.PROPERTY_COLLECTION);
-    List<String> fields = Splitter.on(',').trimResults()
-      .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_SCHEMA, ""));
-    List<String> pullDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
-      .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS, ""));
-    List<String> skipDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
-      .splitToList(conf.get(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS, ""));
-    String customQuery = conf.get(FirestoreSourceConstants.PROPERTY_CUSTOM_QUERY, "");
+    config = taskAttemptContext.getConfiguration();
 
-    db = FirestoreUtil.getFirestore(serviceAccountFilePath, projectId);
+    String projectId = config.get(FirestoreConfig.NAME_PROJECT);
+    String databaseId = config.get(FirestoreConfig.NAME_DATABASE);
+    String collection = Strings.nullToEmpty(config.get(FirestoreConstants.PROPERTY_COLLECTION)).trim();
+
+    // Get Service Account
+    Boolean isServiceAccountFilePath = false;
+    String serviceAccountFilePath = config.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
+
+    // Get Service Account whether JSON or FilePath
+    String serviceAccountType = config.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_TYPE);
+
+    String serviceAccount = "";
+    if (serviceAccountType.equalsIgnoreCase(FirestoreConfig.SERVICE_ACCOUNT_FILE_PATH)) {
+      serviceAccount = config.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH);
+      isServiceAccountFilePath = true;
+    } else if (serviceAccountType.equalsIgnoreCase(FirestoreConfig.SERVICE_ACCOUNT_JSON)) {
+      serviceAccount = config.get(FirestoreConfig.NAME_SERVICE_ACCOUNT_JSON);
+      isServiceAccountFilePath = false;
+    } else {
+      throw new FirestoreInitializationException("Service account type can only be either a File Path or JSON.");
+    }
+
+    LOG.debug("Initialize RecordReader(projectId={}, databaseId={}, collection={}, isServiceAccountFilePath={}, " +
+     "serviceAccountFilePath={}", projectId, databaseId, collection, isServiceAccountFilePath, serviceAccountFilePath);
+
+    List<String> fields = Splitter.on(',').trimResults()
+      .splitToList(config.get(FirestoreSourceConstants.PROPERTY_SCHEMA, ""));
+    List<String> pullDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
+      .splitToList(config.get(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS, ""));
+    List<String> skipDocuments = Splitter.on(',').trimResults().omitEmptyStrings()
+      .splitToList(config.get(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS, ""));
+    String customQuery = config.get(FirestoreSourceConstants.PROPERTY_CUSTOM_QUERY, "");
+
+    db = FirestoreUtil.getFirestore(serviceAccount, isServiceAccountFilePath, projectId, databaseId);
 
     try {
       List<FilterInfo> filters = getParsedFilters(customQuery);

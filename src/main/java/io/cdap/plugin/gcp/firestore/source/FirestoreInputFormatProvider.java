@@ -39,7 +39,10 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
   /**
    * Constructor for FirestoreInputFormatProvider object.
    * @param project the project of Firestore DB
-   * @param serviceAccountPath the service account path of Firestore DB
+   * @param databaseName Name of the Firestore database
+   * @param serviceAccountFilePath the service account path of Firestore DB
+   * @param serviceAccountJson JSON content of the service account credentials
+   * @param serviceAccountType The type of the Service account if it is stored in a filePath or JSON
    * @param collection the collection
    * @param mode there are two modes (basic and advanced)
    * @param pullDocuments the list of documents to pull
@@ -48,18 +51,24 @@ public class FirestoreInputFormatProvider implements InputFormatProvider {
    * @param fields the fields of collection
    */
   public FirestoreInputFormatProvider(
-      String project, @Nullable String serviceAccountPath, String collection, String mode,
+      String project, String databaseName, @Nullable String serviceAccountFilePath, @Nullable String serviceAccountJson,
+      String serviceAccountType, String collection, String mode,
       String pullDocuments, String skipDocuments, String filters, List<String> fields) {
     ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>()
       .put(FirestoreConfig.NAME_PROJECT, project)
+      .put(FirestoreConfig.NAME_DATABASE, databaseName)
+      .put(FirestoreConfig.NAME_SERVICE_ACCOUNT_TYPE, serviceAccountType)
       .put(FirestoreConstants.PROPERTY_COLLECTION, Strings.isNullOrEmpty(collection) ? "" : collection)
       .put(FirestoreSourceConstants.PROPERTY_QUERY_MODE, mode)
       .put(FirestoreSourceConstants.PROPERTY_PULL_DOCUMENTS, Strings.isNullOrEmpty(pullDocuments) ? "" : pullDocuments)
       .put(FirestoreSourceConstants.PROPERTY_SKIP_DOCUMENTS, Strings.isNullOrEmpty(skipDocuments) ? "" : skipDocuments)
       .put(FirestoreSourceConstants.PROPERTY_CUSTOM_QUERY, Strings.isNullOrEmpty(filters) ? "" : filters)
       .put(FirestoreSourceConstants.PROPERTY_SCHEMA, Joiner.on(",").join(fields));
-    if (Objects.nonNull(serviceAccountPath)) {
-      builder.put(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH, serviceAccountPath);
+    if (Objects.nonNull(serviceAccountFilePath)) {
+      builder.put(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH, serviceAccountFilePath);
+    }
+    if (Objects.nonNull(serviceAccountJson)) {
+      builder.put(FirestoreConfig.NAME_SERVICE_ACCOUNT_JSON, serviceAccountJson);
     }
     this.configMap = builder.build();
   }

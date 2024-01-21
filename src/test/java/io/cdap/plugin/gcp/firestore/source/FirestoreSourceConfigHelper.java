@@ -23,7 +23,7 @@ public class FirestoreSourceConfigHelper {
 
   public static final String TEST_REF_NAME = "TestRefName";
   public static final String TEST_PROJECT = "test-project";
-  public static final String TEST_DATABASE = "TestDatabase";
+  public static final String TEST_DATABASE = "testdatabase";
   public static final String TEST_COLLECTION = "TestCollection";
 
   public static ConfigBuilder newConfigBuilder() {
@@ -34,7 +34,7 @@ public class FirestoreSourceConfigHelper {
     private String referenceName = TEST_REF_NAME;
     private String project = TEST_PROJECT;
     private String serviceFilePath = "/path/to/file";
-    private String database = TEST_DATABASE;
+    private String databaseName = TEST_DATABASE;
     private String collection = TEST_COLLECTION;
     private String includeDocumentId = "true";
     private String idAlias = "__id__";
@@ -56,7 +56,7 @@ public class FirestoreSourceConfigHelper {
     }
 
     public ConfigBuilder setDatabase(String database) {
-      this.database = database;
+      this.databaseName = database;
       return this;
     }
 
@@ -81,7 +81,7 @@ public class FirestoreSourceConfigHelper {
     }
 
     public FirestoreSourceConfig build() {
-      return new FirestoreSourceConfig(referenceName, project, serviceFilePath, collection,
+      return new FirestoreSourceConfig(referenceName, project, serviceFilePath, databaseName, collection,
         "Basic", "", "", "", includeDocumentId, idAlias, schema);
     }
   }
