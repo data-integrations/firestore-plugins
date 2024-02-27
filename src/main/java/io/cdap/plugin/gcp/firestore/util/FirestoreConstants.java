@@ -35,4 +35,9 @@ public interface FirestoreConstants {
    * Default column name to be used when document ids to be included in output schema.
    */
   String ID_PROPERTY_NAME = "__id__";
+
+  /**
+   * Default name of the database to use when it is not specified.
+   */
+  String DEFAULT_DATABASE_NAME = "(default)";
 }

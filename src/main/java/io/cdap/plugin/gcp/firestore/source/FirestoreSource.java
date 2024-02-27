@@ -110,7 +110,10 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
     collector.getOrThrowException();
 
     String project = config.getProject();
-    String serviceAccountFile = config.getServiceAccountFilePath();
+    String databaseName = config.getDatabaseName();
+    String serviceAccountFilePath = config.getServiceAccountFilePath();
+    String serviceAccountJson = config.getServiceAccountJson();
+    String serviceAccountType = config.getServiceAccountType();
     String collection = config.getCollection();
     String mode = config.getQueryMode().getValue();
     String pullDocuments = config.getPullDocuments();
@@ -119,8 +122,9 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
 
     List<String> fields = fetchSchemaFields(config.getSchema(collector));
 
-    context.setInput(Input.of(config.getReferenceName(), new FirestoreInputFormatProvider(project, serviceAccountFile,
-      collection, mode, pullDocuments, skipDocuments, filters, fields)));
+    context.setInput(Input.of(config.getReferenceName(), new FirestoreInputFormatProvider(project, databaseName,
+    serviceAccountFilePath, serviceAccountJson, serviceAccountType, collection, mode, pullDocuments, skipDocuments,
+    filters, fields)));
 
     emitLineage(context);
   }
@@ -168,7 +172,8 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
 
     List<QueryDocumentSnapshot> items = null;
     try {
-      Firestore db = FirestoreUtil.getFirestore(config.getServiceAccountFilePath(), config.getProject());
+      Firestore db = FirestoreUtil.getFirestore(config.getServiceAccount(), config.isServiceAccountFilePath(),
+       config.getProject(), config.getDatabaseName());
       ApiFuture<QuerySnapshot> query = db.collection(config.getCollection()).limit(1).get();
       QuerySnapshot querySnapshot = query.get();
 
@@ -176,10 +181,11 @@ public class FirestoreSource extends BatchSource<Object, QueryDocumentSnapshot, 
 
     } catch (Exception e) {
       collector.addFailure(e.getMessage(), "Ensure properties like project, service account " +
-        "file path, collection are correct.")
+        "file path, collection, database name are correct.")
         .withConfigProperty(FirestoreConfig.NAME_SERVICE_ACCOUNT_FILE_PATH)
         .withConfigProperty(FirestoreConfig.NAME_PROJECT)
         .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
+        .withConfigProperty(FirestoreConfig.NAME_DATABASE)
         .withStacktrace(e.getStackTrace());
       collector.getOrThrowException();
     }

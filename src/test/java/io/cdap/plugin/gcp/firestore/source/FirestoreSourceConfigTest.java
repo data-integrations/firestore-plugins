@@ -19,6 +19,7 @@ package io.cdap.plugin.gcp.firestore.source;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.cdap.etl.api.validation.CauseAttributes;
 import io.cdap.cdap.etl.mock.validation.MockFailureCollector;
+import io.cdap.plugin.gcp.firestore.common.FirestoreConfig;
 import io.cdap.plugin.gcp.firestore.util.FirestoreConstants;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -45,6 +46,143 @@ public class FirestoreSourceConfigTest {
     Assert.assertEquals(1, collector.getValidationFailures().size());
     Assert.assertEquals(FirestoreConstants.PROPERTY_COLLECTION, collector.getValidationFailures().get(0)
       .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithSpecialCharacters() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("a!!!==--zz")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name can only include letters, numbers and hyphen characters.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithUppercaseCharacters() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase(FirestoreSourceConfigHelper.TEST_DATABASE.toUpperCase())
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name must be in lowercase.", collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithoutFirstLetterCharacter() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("4testdatabase")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name's first character can only be an alphabet.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithLastCharacterHyphen() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("testdatabase-")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name's last character can only be a letter or a number.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithLessThanFourCharacters() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("tes")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name should be at least 4 letters.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameWithMoreThanSixtyThreeCharacters() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("testdatabase11233aaasssssssssssssssssssssssssssssssssssssssssssssssss")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name cannot be more than 63 characters.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabaseNameShouldNotBeUUID() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("b793f8c6-e52c-43c7-8ac4-d0cdfaecbb8e")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(1, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreConfig.NAME_DATABASE, collector.getValidationFailures().get(0)
+      .getCauses().get(0).getAttribute(CauseAttributes.STAGE_CONFIG));
+    Assert.assertEquals("Database name cannot contain a UUID.",
+     collector.getValidationFailures().get(0).getMessage());
+  }
+
+  @Test
+  public void testValidateWithDatabase() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase(FirestoreSourceConfigHelper.TEST_DATABASE)
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(0, collector.getValidationFailures().size());
+    Assert.assertEquals(FirestoreSourceConfigHelper.TEST_DATABASE, config.getDatabaseName());
+  }
+
+  @Test
+  public void testValidateWithEmptyDatabase() {
+    MockFailureCollector collector = new MockFailureCollector();
+    FirestoreSourceConfig config = withFirestoreValidationMock(FirestoreSourceConfigHelper.newConfigBuilder()
+      .setCollection(FirestoreSourceConfigHelper.TEST_COLLECTION)
+      .setDatabase("")
+      .build(), collector);
+
+    config.validate(collector);
+    Assert.assertEquals(0, collector.getValidationFailures().size());
+    Assert.assertEquals("(default)", config.getDatabaseName());
   }
 
   @Test

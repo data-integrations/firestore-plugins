@@ -51,3 +51,6 @@ release.properties
 
 # Remove dev directory.
 dev
+
+# VSCode Files
+.vscode

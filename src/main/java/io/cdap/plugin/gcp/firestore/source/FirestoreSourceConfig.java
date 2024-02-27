@@ -104,25 +104,28 @@ public class FirestoreSourceConfig extends FirestoreConfig {
 
   /**
    * Constructor for FirestoreSourceConfig object.
-   * @param referenceName the reference name
-   * @param project the project id
-   * @param serviceFilePath the service file path
-   * @param collection the collection id
-   * @param queryMode the query mode (basic or advanced)
-   * @param pullDocuments the list of documents to pull
-   * @param skipDocuments the list of documents to skip
-   * @param filters the filter for given field as well as value
+   * 
+   * @param referenceName     the reference name
+   * @param project           the project id
+   * @param serviceFilePath   the service file path
+   * @param databaseName      the name of the database
+   * @param collection        the collection id
+   * @param queryMode         the query mode (basic or advanced)
+   * @param pullDocuments     the list of documents to pull
+   * @param skipDocuments     the list of documents to skip
+   * @param filters           the filter for given field as well as value
    * @param includeDocumentId the included document id
-   * @param idAlias the id alias
-   * @param schema the schema
+   * @param idAlias           the id alias
+   * @param schema            the schema
    */
   public FirestoreSourceConfig(
-      String referenceName, String project, String serviceFilePath, String collection,
+      String referenceName, String project, String serviceFilePath, String databaseName, String collection,
       String queryMode, String pullDocuments, String skipDocuments, String filters,
       String includeDocumentId, String idAlias, String schema) {
     this.referenceName = referenceName;
     this.project = project;
     this.serviceFilePath = serviceFilePath;
+    this.databaseName = databaseName;
     this.collection = collection;
     this.queryMode = queryMode;
     this.pullDocuments = pullDocuments;
@@ -197,6 +200,7 @@ public class FirestoreSourceConfig extends FirestoreConfig {
 
   /**
    * Return the Schema.
+   * 
    * @param collector the FailureCollector
    * @return The Schema
    */
@@ -209,7 +213,8 @@ public class FirestoreSourceConfig extends FirestoreConfig {
     } catch (IOException e) {
       collector.addFailure("Invalid schema: " + e.getMessage(), null)
         .withConfigProperty(FirestoreSourceConstants.PROPERTY_SCHEMA);
-      // if there was an error that was added, it will throw an exception, otherwise, this statement will
+      // if there was an error that was added, it will throw an exception, otherwise,
+      // this statement will
       // not be executed
       collector.getOrThrowException();
       return null;
@@ -243,33 +248,37 @@ public class FirestoreSourceConfig extends FirestoreConfig {
     }
     Firestore db = null;
     try {
-      db = FirestoreUtil.getFirestore(getServiceAccountFilePath(), getProject());
+      db = FirestoreUtil.getFirestore(getServiceAccount(), isServiceAccountFilePath(), getProject(), getDatabaseName());
 
       if (db != null) {
         db.close();
       }
     } catch (FirestoreInitializationException e) {
       collector.addFailure(e.getMessage(), "Ensure properties like project, service account " +
-        "file path are correct.")
+        "file path, database name are correct.")
         .withConfigProperty(NAME_SERVICE_ACCOUNT_FILE_PATH)
         .withConfigProperty(NAME_PROJECT)
+        .withConfigProperty(NAME_DATABASE)
         .withStacktrace(e.getStackTrace());
     } catch (IllegalArgumentException e) {
-      collector.addFailure(e.getMessage(), "Ensure collection name exists in Firestore.")
+      collector.addFailure(e.getMessage(), "Ensure database name & collection name exists in Firestore.")
         .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
+        .withConfigProperty(FirestoreConfig.NAME_DATABASE)
         .withStacktrace(e.getStackTrace());
     } catch (Exception e) {
-      collector.addFailure("Error while connecting to Firestoe - " + e.getMessage(),
-          "Ensure Firestore connection params are correct.")
-          .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
-          .withStacktrace(e.getStackTrace());
+      collector.addFailure("Error while connecting to Firestore - " + e.getMessage(),
+        "Ensure Firestore connection params are correct.")
+        .withConfigProperty(FirestoreConstants.PROPERTY_COLLECTION)
+        .withConfigProperty(FirestoreConfig.NAME_DATABASE)
+        .withStacktrace(e.getStackTrace());
       LOG.error("Error", e);
     }
     collector.getOrThrowException();
   }
 
   /**
-   * Validates the given referenceName to consists of characters allowed to represent a dataset.
+   * Validates the given collection name to consists of characters allowed to
+   * represent a dataset.
    */
   public void validateCollection(FailureCollector collector) {
     if (containsMacro(FirestoreConstants.PROPERTY_COLLECTION)) {
@@ -295,9 +304,10 @@ public class FirestoreSourceConfig extends FirestoreConfig {
   /**
    * Validates given field schema to be compliant with Firestore types.
    *
-   * @param fieldName field name
+   * @param fieldName   field name
    * @param fieldSchema schema for CDAP field
-   * @param collector failure collector to collect failures if schema contains unsupported type.
+   * @param collector   failure collector to collect failures if schema contains
+   *                    unsupported type.
    */
   private void validateFieldSchema(String fieldName, Schema fieldSchema, FailureCollector collector) {
     Schema.LogicalType logicalType = fieldSchema.getLogicalType();
@@ -342,8 +352,7 @@ public class FirestoreSourceConfig extends FirestoreConfig {
 
         return;
       case UNION:
-        fieldSchema.getUnionSchemas().forEach(unionSchema ->
-          validateFieldSchema(fieldName, unionSchema, collector));
+        fieldSchema.getUnionSchemas().forEach(unionSchema -> validateFieldSchema(fieldName, unionSchema, collector));
         return;
       default:
         collector.addFailure(String.format("Field '%s' is of unsupported type '%s'",
@@ -360,11 +369,12 @@ public class FirestoreSourceConfig extends FirestoreConfig {
   public boolean shouldConnect() {
     return !containsMacro(FirestoreSourceConstants.PROPERTY_SCHEMA) &&
       !containsMacro(NAME_SERVICE_ACCOUNT_FILE_PATH) &&
+      !containsMacro(NAME_SERVICE_ACCOUNT_JSON) &&
       !containsMacro(NAME_PROJECT) &&
       tryGetProject() != null &&
       !autoServiceAccountUnavailable();
   }
-  
+
   private void validateDocumentLists(FailureCollector collector) {
     if (Strings.isNullOrEmpty(getPullDocuments()) ||
       Strings.isNullOrEmpty(getSkipDocuments()) ||
@@ -416,7 +426,9 @@ public class FirestoreSourceConfig extends FirestoreConfig {
   }
 
   /**
-   * Returns the empty list if filters contains a macro. Otherwise, the list returned can never be empty.
+   * Returns the empty list if filters contains a macro. Otherwise, the list
+   * returned can never be empty.
+   *
    * @param collector the FailureCollector
    * @return the this of FilterInfo
    */
